@@ -189,7 +189,9 @@ class CiscoXrSSH(CiscoXrBase):
 class CiscoXrTelnet(CiscoXrBase):
     """Cisco XR Telnet driver."""
 
-    pass
+    def session_preparation(self):
+        """Prepare the session after the connection has been established."""
+        self.set_base_prompt()
 
 
 class CiscoXrFileTransfer(CiscoFileTransfer):
@@ -234,3 +236,8 @@ class CiscoXrFileTransfer(CiscoFileTransfer):
 
     def disable_scp(self, cmd: str = "") -> None:
         raise NotImplementedError
+
+
+class CiscoCxrHa(CiscoXrTelnet):
+    def find_prompt(self, delay_factor=1, pattern=r'[a-z0-9]$', verbose=False, telnet_return='\n'):
+        return super().find_prompt(delay_factor=delay_factor, pattern=pattern)
