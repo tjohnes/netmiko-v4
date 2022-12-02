@@ -26,6 +26,8 @@ from netmiko.cisco import (
     CiscoIosFileTransfer,
     CiscoIosTelnet,
     CiscoIosSerial,
+    CiscoBspSSH,
+    CiscoBspTelnet,
 )
 from netmiko.cisco import CiscoNxosSSH, CiscoNxosFileTransfer
 from netmiko.cisco import CiscoS300SSH, CiscoS300Telnet
@@ -157,6 +159,7 @@ CLASS_MAPPER_BASE = {
     "cisco_xe": CiscoIosSSH,
     "cisco_xr": CiscoXrSSH,
     "cisco_cloudnative": CiscoCloudnativeSSH,
+    "cisco_bsp": CiscoBspSSH,
     "cloudgenix_ion": CloudGenixIonSSH,
     "coriant": CoriantSSH,
     "dell_dnos9": DellForce10SSH,
@@ -283,6 +286,7 @@ CLASS_MAPPER["cisco_xr_telnet"] = CiscoXrTelnet
 CLASS_MAPPER["cisco_xe_telnet"] = CiscoIosTelnet
 CLASS_MAPPER["cisco_s300_telnet"] = CiscoS300Telnet
 CLASS_MAPPER["cisco_cxr_ha_telnet"] = CiscoCxrHa
+CLASS_MAPPER["cisco_bsp_telnet"] = CiscoBspTelnet
 CLASS_MAPPER["dell_dnos6_telnet"] = DellDNOS6Telnet
 CLASS_MAPPER["dell_powerconnect_telnet"] = DellPowerConnectTelnet
 CLASS_MAPPER["dlink_ds_telnet"] = DlinkDSTelnet
