@@ -10,10 +10,10 @@ import warnings
 import socket
 
 from netmiko.cisco.cisco_xr import CiscoXrSSH
-from netmiko.netmiko_globals import BACKSPACE_CHAR, LOOP_DELAY
+from netmiko.netmiko_globals import BACKSPACE_CHAR
 from netmiko.utilities import get_structured_data
 from netmiko.cafy_custom_exceptions import SessionDownException, PromptNotFoundException, PatternNotFoundException
-from netmiko.cafy_custom_exceptions import ConfigCommitError, ConfigModeEnterError, ConfigModeExitError
+from netmiko.cafy_custom_exceptions import ConfigCommitError, ConfigModeEnterError, ConfigModeExitError, LOOP_DELAY
 from netmiko.py23_compat import string_types
 
 work_dir = os.getenv('CAFYKIT_WORK_DIR')

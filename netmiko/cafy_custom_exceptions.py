@@ -37,3 +37,4 @@ class ConfigCommitError(Exception):
     """
     pass
 
+LOOP_DELAY = 0.1
