@@ -15,8 +15,6 @@ from netmiko.utilities import get_structured_data
 from netmiko.cafy_custom_exceptions import SessionDownException, PromptNotFoundException, PatternNotFoundException
 from netmiko.cafy_custom_exceptions import ConfigCommitError, ConfigModeEnterError, ConfigModeExitError, LOOP_DELAY
 
-from __future__ import unicode_literals
-
 work_dir = os.getenv('CAFYKIT_WORK_DIR')
 if work_dir:
     formatter = logging.Formatter(fmt='%(asctime)s %(levelname)-8s %(message)s',
