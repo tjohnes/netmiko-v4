@@ -180,6 +180,7 @@ class BaseConnection:
         sock: Optional[socket.socket] = None,
         auto_connect: bool = True,
         delay_factor_compat: bool = False,
+        max_read_timeout: Optional[int] = None
     ) -> None:
         """
         Initialize attributes for establishing connection to target device.
