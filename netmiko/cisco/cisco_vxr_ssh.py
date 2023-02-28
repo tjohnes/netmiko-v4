@@ -14,7 +14,8 @@ from netmiko.netmiko_globals import BACKSPACE_CHAR
 from netmiko.utilities import get_structured_data
 from netmiko.cafy_custom_exceptions import SessionDownException, PromptNotFoundException, PatternNotFoundException
 from netmiko.cafy_custom_exceptions import ConfigCommitError, ConfigModeEnterError, ConfigModeExitError, LOOP_DELAY
-from netmiko.py23_compat import string_types
+
+from __future__ import unicode_literals
 
 work_dir = os.getenv('CAFYKIT_WORK_DIR')
 if work_dir:
@@ -409,7 +410,7 @@ class CiscoVxrSSH(CiscoXrSSH):
 
         if config_commands is None:
             return ''
-        elif isinstance(config_commands, string_types):
+        elif isinstance(config_commands, (str, )):
             config_commands = (config_commands,)
 
         if not hasattr(config_commands, '__iter__'):
