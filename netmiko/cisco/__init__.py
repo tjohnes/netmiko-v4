@@ -17,6 +17,7 @@ from netmiko.cisco.cisco_tp_tcce import CiscoTpTcCeSSH
 from netmiko.cisco.cisco_viptela import CiscoViptelaSSH
 from netmiko.cisco.cisco_cloudnative import CiscoCloudnativeSSH, CiscoCloudnativeTelnet
 from netmiko.cisco.cisco_bsp import CiscoBspSSH, CiscoBspTelnet
+from netmiko.cisco.cisco_vxr_ssh import CiscoVxrSSH
 
 __all__ = [
     "CiscoIosSSH",

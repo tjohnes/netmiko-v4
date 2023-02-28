@@ -24,6 +24,8 @@ from netmiko.exceptions import (
 from netmiko.exceptions import ConfigInvalidException
 from netmiko.exceptions import ReadException, ReadTimeout
 from netmiko.exceptions import NetmikoBaseException, ConnectionException
+from netmiko.cafy_custom_exceptions import PatternNotFoundException, PromptNotFoundException, SessionDownException
+from netmiko.cafy_custom_exceptions import ConfigModeExitError, ConfigModeEnterError, ConfigCommitError
 from netmiko.ssh_autodetect import SSHDetect
 from netmiko.base_connection import BaseConnection
 from netmiko.scp_functions import file_transfer, progress_bar
@@ -49,6 +51,12 @@ __all__ = (
     "ReadTimeout",
     "NetmikoAuthenticationException",
     "NetMikoAuthenticationException",
+    "PatternNotFoundException",
+    "PromptNotFoundException",
+    "SessionDownException",
+    "ConfigModeExitError",
+    "ConfigModeEnterError",
+    "ConfigCommitError",
     "InLineTransfer",
     "redispatch",
     "SSHDetect",
