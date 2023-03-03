@@ -42,6 +42,7 @@ class CiscoXrBase(CiscoBaseConnection):
         force=False,
         best_effort=False,
         replace=False,
+        **kwargs
     ) -> str:
         """
         Commit the candidate configuration.
@@ -84,6 +85,7 @@ class CiscoXrBase(CiscoBaseConnection):
         """
         if delay_factor is not None:
             warnings.warn(DELAY_FACTOR_DEPR_SIMPLE_MSG, DeprecationWarning)
+        commit_error_dialog_dict = kwargs.get('commit_error_dialog_dict')
         if confirm and not confirm_delay:
             raise ValueError("Invalid arguments supplied to XR commit")
         if confirm_delay and not confirm:
@@ -163,11 +165,23 @@ class CiscoXrBase(CiscoBaseConnection):
         if error_marker in output:
             raise ValueError(f"Commit failed with the following errors:\n\n{output}")
         if alt_error_marker in output:
+            if commit_error_dialog_dict is not None and alt_error_marker in commit_error_dialog_dict:
+                marker_value = commit_error_dialog_dict[alt_error_marker]
+                output += new_data
+                new_data += self._send_command_str(
+                    marker_value,
+                    expect_string=r"\)#$",
+                    strip_prompt=False,
+                    strip_command=False,
+                    read_timeout=read_timeout,
+                )
+                output += new_data
+            else:
             # Other commits occurred, don't proceed with commit
-            output += self._send_command_timing_str(
-                "no", strip_prompt=False, strip_command=False
-            )
-            raise ValueError(f"Commit failed with the following errors:\n\n{output}")
+                output += self._send_command_timing_str(
+                    "no", strip_prompt=False, strip_command=False
+                )
+                raise ValueError(f"Commit failed with the following errors:\n\n{output}")
 
         return output
 
