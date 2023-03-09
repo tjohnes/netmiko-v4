@@ -60,9 +60,9 @@ class SessionLog:
                 data = data.replace(hidden_data, "********")
 
             if isinstance(self.session_log, io.BufferedIOBase):
-                self.session_log.write(write_bytes(data, encoding=self.file_encoding))
+                self.session_log.write(write_bytes('>'+data, encoding=self.file_encoding))
             else:
-                self.session_log.write(data)
+                self.session_log.write('>'+data)
 
             assert isinstance(self.session_log, io.BufferedIOBase) or isinstance(
                 self.session_log, io.TextIOBase
