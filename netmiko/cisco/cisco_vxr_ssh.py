@@ -74,7 +74,7 @@ class CiscoVxrSSH(CiscoXrSSH):
             # Always unlock the SSH channel, even on exception.
             self._unlock_netmiko_session()
 
-    def read_until_pattern(self, pattern='', re_flags=0, max_loops=None):
+    def read_until_pattern(self, pattern='', re_flags=0, max_loops=None, read_timeout=1800):
         """Function that reads channel until pattern is detected.
 
         pattern takes a regular expression.
@@ -98,6 +98,8 @@ class CiscoVxrSSH(CiscoXrSSH):
         :param max_loops: max number of iterations to read the channel before raising exception.
             Will default to be based upon self.timeout.
         :type max_loops: int
+        :param read_timeout: needs for betmiko4, session_preparation function in base_connection.py calls
+        read_until_pattern with read_timeout arg. Iorder to handle that, this param is added here.
         """
         if max_loops is not None:
             warnings.warn(MAX_LOOPS_DEPR_SIMPLE_MSG, DeprecationWarning)
