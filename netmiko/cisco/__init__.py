@@ -44,4 +44,5 @@ __all__ = [
     "CiscoCloudnativeSSH",
     "CiscoCloudnativeTelnet",
     "CiscoCxrHa",
+    "CiscoVxrSSH"
 ]

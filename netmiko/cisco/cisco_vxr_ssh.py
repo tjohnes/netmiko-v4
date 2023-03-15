@@ -587,7 +587,7 @@ class CiscoVxrSSH(CiscoXrSSH):
                 log.error(msg)
                 raise PatternNotFoundException(msg)
 
-            if "Uncommitted changes found" in output:
+            if "Uncommitted" in output:
                 config_mode_exit_dialog_cmd = "no"
                 self.write_channel(self.normalize_cmd(config_mode_exit_dialog_cmd))
                 try:

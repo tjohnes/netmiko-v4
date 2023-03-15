@@ -35,6 +35,7 @@ from netmiko.cisco import CiscoTpTcCeSSH
 from netmiko.cisco import CiscoViptelaSSH
 from netmiko.cisco import CiscoWlcSSH
 from netmiko.cisco import CiscoXrSSH, CiscoXrTelnet, CiscoXrFileTransfer
+from netmiko.cisco import CiscoVxrSSH
 from netmiko.cisco import CiscoCloudnativeSSH
 from netmiko.cisco import CiscoCxrHa
 from netmiko.citrix import NetscalerSSH
@@ -158,6 +159,7 @@ CLASS_MAPPER_BASE = {
     "cisco_wlc": CiscoWlcSSH,
     "cisco_xe": CiscoIosSSH,
     "cisco_xr": CiscoXrSSH,
+    "cisco_vxr": CiscoVxrSSH,
     "cisco_cloudnative": CiscoCloudnativeSSH,
     "cisco_bsp": CiscoBspSSH,
     "cloudgenix_ion": CloudGenixIonSSH,
@@ -249,6 +251,7 @@ FILE_TRANSFER_MAP = {
     "cisco_nxos": CiscoNxosFileTransfer,
     "cisco_xe": CiscoIosFileTransfer,
     "cisco_xr": CiscoXrFileTransfer,
+    "cisco_vxr": CiscoXrFileTransfer,
     "dell_os10": DellOS10FileTransfer,
     "extreme_exos": ExtremeExosFileTransfer,
     "juniper_junos": JuniperFileTransfer,
