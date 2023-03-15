@@ -51,6 +51,9 @@ class CiscoVxrSSH(CiscoXrSSH):
         """
         # 30 minutes
         self.max_read_timeout = kwargs.get('max_read_timeout', 1800)
+        # In netmiko4, max_read_timeout which was added in netmiko2's vxr_ssh doesnt exist,
+        # instead read_timeout serves the same purpose, therefore assigning max_read_timeout to read_timeout
+        self.read_timeout = self.max_read_timeout
         kwargs["blocking_timeout"] = self.max_read_timeout
         super().__init__(**kwargs)
 
@@ -103,14 +106,14 @@ class CiscoVxrSSH(CiscoXrSSH):
         output = ''
         if not pattern:
             pattern = re.escape(self.base_prompt)
-        log.debug("In read_until_pattern, max_read_timeout: {}, blocking_timeout: {}, pattern is: {}".format(
-            self.max_read_timeout, self.blocking_timeout, pattern))
+        log.debug("In read_until_pattern, read_timeout: {}, blocking_timeout: {}, pattern is: {}".format(
+            self.read_timeout, self.blocking_timeout, pattern))
 
         start_time = time.time()
         current_time = time.time()
 
-        # Keep reading data until pattern is found or session is alive or max_read_timeout is reached
-        while current_time - start_time < self.max_read_timeout and self.remote_conn.closed == False:
+        # Keep reading data until pattern is found or session is alive or read_timeout is reached
+        while current_time - start_time < self.read_timeout and self.remote_conn.closed == False:
             new_data = self.read_channel()
             output += new_data
             self._write_session_log(new_data)
@@ -129,7 +132,7 @@ class CiscoVxrSSH(CiscoXrSSH):
                 raise SessionDownException(msg)
             else:
                 msg = "Search Pattern not found after sending command and waiting for {} seconds. Expected Pattern: {}. Output: {}".format(
-                    self.max_read_timeout, pattern, output)
+                    self.read_timeout, pattern, output)
                 log.error(msg)
                 raise PatternNotFoundException(msg)
 
@@ -154,8 +157,8 @@ class CiscoVxrSSH(CiscoXrSSH):
         start_time = time.time()
         current_time = time.time()
 
-        # Keep reading data until prompt is found or session is alive or max_read_timeout is reached
-        while current_time - start_time < self.max_read_timeout and self.remote_conn.closed == False:
+        # Keep reading data until prompt is found or session is alive or read_timeout is reached
+        while current_time - start_time < self.read_timeout and self.remote_conn.closed == False:
             prompt = self.read_channel().strip()
 
             if prompt:
@@ -179,7 +182,7 @@ class CiscoVxrSSH(CiscoXrSSH):
                 log.error(msg)
                 raise SessionDownException(msg)
             else:
-                msg = "Prompt not found after waiting for {} seconds".format(self.max_read_timeout)
+                msg = "Prompt not found after waiting for {} seconds".format(self.read_timeout)
                 log.error(msg)
                 raise PromptNotFoundException(msg)
 
@@ -237,8 +240,8 @@ class CiscoVxrSSH(CiscoXrSSH):
             log.warning(MAX_LOOPS_DEPR_SIMPLE_MSG)
 
         config_large_msg = "This could be a few minutes if your config is large"
-        log.info("In send_command, max_read_timeout: {}, blocking_timeout: {}, command: {}".format(
-            self.max_read_timeout, self.blocking_timeout, command_string))
+        log.info("In send_command, read_timeout: {}, blocking_timeout: {}, command: {}".format(
+            self.read_timeout, self.blocking_timeout, command_string))
 
         # Find the current router prompt
         if expect_string is None:
@@ -261,8 +264,8 @@ class CiscoVxrSSH(CiscoXrSSH):
         start_time = time.time()
         current_time = time.time()
 
-        # Keep reading data until search_pattern is found or session is alive or max_read_timeout is reached
-        while current_time - start_time < self.max_read_timeout and self.remote_conn.closed == False:
+        # Keep reading data until search_pattern is found or session is alive or read_timeout is reached
+        while current_time - start_time < self.read_timeout and self.remote_conn.closed == False:
             new_data = self.read_channel()
             if new_data:
                 if self.ansi_escape_codes:
@@ -304,12 +307,12 @@ class CiscoVxrSSH(CiscoXrSSH):
             else:
                 if expect_string is None:
                     msg = "Prompt not found after sending command and waiting for {} seconds. Expected Prompt: {}. Output: {}".format(
-                        self.max_read_timeout, search_pattern, output)
+                        self.read_timeout, search_pattern, output)
                     log.error(msg)
                     raise PromptNotFoundException(msg)
                 else:
                     msg = "Search Pattern not found after sending command and waiting for {} seconds. Expected Pattern: {}. Output: {}".format(
-                        self.max_read_timeout, search_pattern, output)
+                        self.read_timeout, search_pattern, output)
                     log.error(msg)
                     raise PatternNotFoundException(msg)
         output = self._sanitize_output(output, strip_command=strip_command,
