@@ -65,7 +65,10 @@ class CiscoVxrSSH(CiscoXrSSH):
         """
         self._lock_netmiko_session()
         try:
-            self._write_channel(out_data)
+            # Netmiko4 base_connection doesnt have _write_channel()
+            # Therefore calling super().write_channel()  which has same functionality as netmiko2's _write_channel
+            # self._write_channel(out_data)
+            super().write_channel(out_data)
         except socket.error:
             msg = "Session went down while writing command on channel. Command: {}".format(out_data)
             log.error(msg)
