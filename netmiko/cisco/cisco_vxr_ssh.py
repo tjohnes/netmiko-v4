@@ -118,7 +118,9 @@ class CiscoVxrSSH(CiscoXrSSH):
         while current_time - start_time < self.read_timeout and self.remote_conn.closed == False:
             new_data = self.read_channel()
             output += new_data
-            self._write_session_log(new_data)
+            # TODO Netmiko4 base_connection doesnt have _write_session_log() defined. 
+            # Therefore below line is commented to avoid Attribute error
+            # self._write_session_log(new_data)
 
             if re.search(pattern, output, flags=re_flags):
                 log.info("Pattern found. Time Waited: {}.".format(current_time - start_time))
