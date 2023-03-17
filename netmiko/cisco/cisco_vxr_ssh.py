@@ -147,12 +147,13 @@ class CiscoVxrSSH(CiscoXrSSH):
                 raise PatternNotFoundException(msg)
     '''
 
-    '''
-    def find_prompt(self, delay_factor=None):
+    
+    def find_prompt(self, delay_factor=None, pattern: Optional[str] = None):
         """Finds the current network device prompt, last line only.
 
         :param delay_factor: See __init__: global_delay_factor
         :type delay_factor: int
+        :param pattern: to keep compatibility with find_prompt() in base_connection
         """
         if delay_factor is not None:
             warnings.warn(DELAY_FACTOR_DEPR_SIMPLE_MSG, DeprecationWarning)
@@ -209,7 +210,7 @@ class CiscoVxrSSH(CiscoXrSSH):
         self.clear_buffer()
         log.info("Prompt is: {}.".format(prompt))
         return prompt
-    '''
+    
 
     def send_command(self, command_string, expect_string=None, delay_factor=None, max_loops=None, auto_find_prompt=True,
                      strip_prompt=True, strip_command=True, normalize=True, use_textfsm=False, read_timeout=1800):
