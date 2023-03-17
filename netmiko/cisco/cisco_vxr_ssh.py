@@ -146,7 +146,8 @@ class CiscoVxrSSH(CiscoXrSSH):
                 log.error(msg)
                 raise PatternNotFoundException(msg)
     '''
-    
+
+    '''
     def find_prompt(self, delay_factor=None):
         """Finds the current network device prompt, last line only.
 
@@ -208,7 +209,8 @@ class CiscoVxrSSH(CiscoXrSSH):
         self.clear_buffer()
         log.info("Prompt is: {}.".format(prompt))
         return prompt
-
+    '''
+    
     def send_command(self, command_string, expect_string=None, delay_factor=None, max_loops=None, auto_find_prompt=True,
                      strip_prompt=True, strip_command=True, normalize=True, use_textfsm=False):
         """
