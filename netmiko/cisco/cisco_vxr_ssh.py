@@ -210,9 +210,9 @@ class CiscoVxrSSH(CiscoXrSSH):
         log.info("Prompt is: {}.".format(prompt))
         return prompt
     '''
-    
+
     def send_command(self, command_string, expect_string=None, delay_factor=None, max_loops=None, auto_find_prompt=True,
-                     strip_prompt=True, strip_command=True, normalize=True, use_textfsm=False):
+                     strip_prompt=True, strip_command=True, normalize=True, use_textfsm=False, read_timeout=1800):
         """
         Execute command_string on the SSH channel using a pattern-based mechanism. Generally
         used for show commands. By default this method will keep waiting to receive data until the
@@ -243,6 +243,9 @@ class CiscoVxrSSH(CiscoXrSSH):
 
         :param use_textfsm: Process command output through TextFSM template (default: False).
         :type normalize: bool
+
+        :param read_timeout: send_command() of execute() in cafykit passes read_timeout param that is needed for non vxr devices
+        Therefore inorder to keep the api consistent, this param is added here
         """
         if delay_factor is not None:
             warnings.warn(DELAY_FACTOR_DEPR_SIMPLE_MSG, DeprecationWarning)
