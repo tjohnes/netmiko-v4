@@ -1,6 +1,7 @@
 from __future__ import print_function
 from __future__ import unicode_literals
 
+
 import re
 import time
 import logging
@@ -148,7 +149,7 @@ class CiscoVxrSSH(CiscoXrSSH):
     '''
 
     
-    def find_prompt(self, delay_factor=None, pattern: Optional[str] = None):
+    def find_prompt(self, delay_factor=None, pattern= None):
         """Finds the current network device prompt, last line only.
 
         :param delay_factor: See __init__: global_delay_factor
