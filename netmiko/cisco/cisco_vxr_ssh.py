@@ -63,7 +63,9 @@ class CiscoVxrSSH(CiscoXrSSH):
         :param out_data: data to be written to the channel
         :type out_data: str (can be either unicode/byte string)
         """
-        self._lock_netmiko_session()
+        # Netmiko4 already has @lock_channel decorator on write_channel() in base_Connection.py
+        # Therefore below self._lock_netmiko_session() is commented
+        #self._lock_netmiko_session()
         try:
             # Netmiko4 base_connection doesnt have _write_channel()
             # Therefore calling super().write_channel()  which has same functionality as netmiko2's _write_channel
