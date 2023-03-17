@@ -389,7 +389,7 @@ class CiscoVxrSSH(CiscoXrSSH):
 
     def send_config_set(self, config_commands=None, exit_config_mode=False, delay_factor=None,
                         max_loops=None, strip_prompt=False, strip_command=False,
-                        config_mode_command=None):
+                        config_mode_command=None, read_timeout=None):
         """
         Send configuration commands down the SSH channel.
 
@@ -418,6 +418,9 @@ class CiscoVxrSSH(CiscoXrSSH):
 
         :param config_mode_command: The command to enter into config mode
         :type config_mode_command: str
+
+        :param read_timeout: Absolute timer to send to read_channel_timing. Should be rarely needed
+        Added this to make it consistent with same function in base_connection.py
         """
         if delay_factor is not None:
             warnings.warn(DELAY_FACTOR_DEPR_SIMPLE_MSG, DeprecationWarning)
