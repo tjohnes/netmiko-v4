@@ -242,10 +242,65 @@ class CiscoXrTelnet(CiscoXrBase):
     def session_preparation(self):
         """Prepare the session after the connection has been established."""
         self.write_channel('\r\n')
+        out = self.set_base_prompt()
+        if 'RP Node is not ' in out:
+            return
         super().session_preparation()
         #self.set_base_prompt()
         #self.disable_paging()
         #self.set_terminal_width(command='terminal width 511')
+
+    def set_base_prompt(
+        self,
+        pri_prompt_terminator: str = "#",
+        alt_prompt_terminator: str = ">",
+        standby_prompt='RP Node is not ',
+        delay_factor: float = 1.0,
+        pattern: Optional[str] = None,
+    ) -> str:
+        """Sets self.base_prompt
+
+        Used as delimiter for stripping of trailing prompt in output.
+
+        Should be set to something that is general and applies in multiple contexts. For Cisco
+        devices this will be set to router hostname (i.e. prompt without > or #).
+
+        This will be set on entering user exec or privileged exec on Cisco, but not when
+        entering/exiting config mode.
+
+        :param pri_prompt_terminator: Primary trailing delimiter for identifying a device prompt
+
+        :param alt_prompt_terminator: Alternate trailing delimiter for identifying a device prompt
+
+        :param standby_prompt: standby_prompt 
+
+        :param delay_factor: See __init__: global_delay_factor
+
+        :param pattern: Regular expression pattern to search for in find_prompt() call
+        """
+        if pattern is None:
+            if pri_prompt_terminator and alt_prompt_terminator:
+                pri_term = re.escape(pri_prompt_terminator)
+                alt_term = re.escape(alt_prompt_terminator)
+                pattern = rf"({pri_term}|{alt_term})"
+            elif pri_prompt_terminator:
+                pattern = re.escape(pri_prompt_terminator)
+            elif alt_prompt_terminator:
+                pattern = re.escape(alt_prompt_terminator)
+
+        if standby_prompt:
+            pattern = rf"({pattern}|{standby_prompt})"
+
+        if pattern:
+            prompt = self.find_prompt(delay_factor=delay_factor, pattern=pattern)
+        else:
+            prompt = self.find_prompt(delay_factor=delay_factor)
+
+        if not prompt[-1] in (pri_prompt_terminator, alt_prompt_terminator, standby_prompt):
+            raise ValueError(f"Router prompt not found: {repr(prompt)}")
+        # Strip off trailing terminator
+        self.base_prompt = prompt[:-1]
+        return self.base_prompt
     
 
 class CiscoXrFileTransfer(CiscoFileTransfer):
