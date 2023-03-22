@@ -278,10 +278,10 @@ class CiscoXrTelnet(CiscoXrBase):
 
         :param pattern: Regular expression pattern to search for in find_prompt() call
         """
-        prompt = self.find_prompt(delay_factor=delay_factor)
-        if standby_prompt in prompt:
-            self.base_prompt = prompt
-            print("standby_prompt =", prompt)
+        out = self.find_prompt(delay_factor=delay_factor)
+        if standby_prompt in out:
+            self.base_prompt = out
+            print("standby_prompt =", out)
             return self.base_prompt
         
         if pattern is None:
