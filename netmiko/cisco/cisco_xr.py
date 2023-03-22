@@ -238,12 +238,11 @@ class CiscoXrSSH(CiscoXrBase):
 class CiscoXrTelnet(CiscoXrBase):
     """Cisco XR Telnet driver."""
 
-    pass
-    '''
+    
     def session_preparation(self):
         """Prepare the session after the connection has been established."""
         self.set_base_prompt()
-    '''
+    
 
 class CiscoXrFileTransfer(CiscoFileTransfer):
     """Cisco IOS-XR SCP File Transfer driver."""
