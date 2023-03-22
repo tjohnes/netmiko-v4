@@ -278,6 +278,11 @@ class CiscoXrTelnet(CiscoXrBase):
 
         :param pattern: Regular expression pattern to search for in find_prompt() call
         """
+        prompt = self.find_prompt(delay_factor=delay_factor)
+        if standby_prompt in prompt:
+            self.base_prompt = prompt
+            return self.base_prompt
+        
         if pattern is None:
             if pri_prompt_terminator and alt_prompt_terminator:
                 pri_term = re.escape(pri_prompt_terminator)
@@ -287,9 +292,6 @@ class CiscoXrTelnet(CiscoXrBase):
                 pattern = re.escape(pri_prompt_terminator)
             elif alt_prompt_terminator:
                 pattern = re.escape(alt_prompt_terminator)
-
-        if standby_prompt:
-            pattern = rf"({pattern}|{standby_prompt})"
 
         if pattern:
             prompt = self.find_prompt(delay_factor=delay_factor, pattern=pattern)
