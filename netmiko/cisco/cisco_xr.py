@@ -282,7 +282,6 @@ class CiscoXrTelnet(CiscoXrBase):
         out = self.find_prompt(delay_factor=delay_factor)
         if standby_prompt in out:
             self.base_prompt = out
-            print("standby_prompt =", out)
             return self.base_prompt
         
         if pattern is None:
