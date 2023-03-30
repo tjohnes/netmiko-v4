@@ -1649,9 +1649,7 @@ before timing out.\n"""
         if normalize:
             command_string = self.normalize_cmd(command_string)
 
-        log.info("In send_command, global_delay:{}, delay_factor:{}, read_timeout:{}".format(self.global_delay_factor,
-                                                                                             delay_factor,
-                                                                                             read_timeout))
+        log.info("In send_command, cmd:{}, read_timeout:{}".format(command_string, read_timeout))
 
         # Start the clock
         start_time = time.time()
