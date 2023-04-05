@@ -73,9 +73,6 @@ class CiscoVxrSSH(CiscoXrSSH):
             msg = "Session went down while writing command on channel. Command: {}".format(out_data)
             log.error(msg)
             raise SessionDownException(msg)
-        finally:
-            # Always unlock the SSH channel, even on exception.
-            self._unlock_netmiko_session()
 
     '''
     def read_until_pattern(self, pattern='', re_flags=0, max_loops=None, read_timeout=1800):
