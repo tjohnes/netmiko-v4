@@ -51,11 +51,8 @@ class CiscoVxrSSH(CiscoXrSSH):
         """Constructor
         """
         # 30 minutes
-        self.max_read_timeout = kwargs.get('max_read_timeout', 1800)
-        # In netmiko4, max_read_timeout which was added in netmiko2's vxr_ssh doesnt exist,
-        # instead read_timeout serves the same purpose, therefore assigning max_read_timeout to read_timeout
-        self.read_timeout = self.max_read_timeout
-        kwargs["blocking_timeout"] = self.max_read_timeout
+        self.read_timeout = kwargs.get('read_timeout', 1800)
+        kwargs["blocking_timeout"] = self.read_timeout
         super().__init__(**kwargs)
 
     def write_channel(self, out_data):
@@ -214,7 +211,7 @@ class CiscoVxrSSH(CiscoXrSSH):
     
 
     def send_command(self, command_string, expect_string=None, delay_factor=None, max_loops=None, auto_find_prompt=True,
-                     strip_prompt=True, strip_command=True, normalize=True, use_textfsm=False, read_timeout=1800):
+                     strip_prompt=True, strip_command=True, normalize=True, use_textfsm=False, read_timeout=1800, cmd_verify=True):
         """
         Execute command_string on the SSH channel using a pattern-based mechanism. Generally
         used for show commands. By default this method will keep waiting to receive data until the
@@ -248,6 +245,9 @@ class CiscoVxrSSH(CiscoXrSSH):
 
         :param read_timeout: send_command() of execute() in cafykit passes read_timeout param that is needed for non vxr devices
         Therefore inorder to keep the api consistent, this param is added here
+
+        :param cmd_verify: Verify command echo before proceeding (default: True)
+        dialog() and transmirt_receive() in cafykit connection lib pass this cmd_verify=False argument, so need to handle in vxr_ssh code
         """
         if delay_factor is not None:
             warnings.warn(DELAY_FACTOR_DEPR_SIMPLE_MSG, DeprecationWarning)
