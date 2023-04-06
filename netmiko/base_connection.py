@@ -1322,10 +1322,6 @@ A paramiko SSHException occurred during connection creation:
                     time.sleep(sleep_time)
                     prompt = self.read_channel().strip()
 
-                    vxr_pattern = "last login"
-                    if vxr_pattern in prompt.lower():
-                        time.sleep((delay_factor * 0.1) + 3)
-                        prompt = self.read_channel()
                     autocommand_pattern = "executing autocommand"
                     if autocommand_pattern in prompt.lower():
                         time.sleep((delay_factor * 0.1) + 5)
