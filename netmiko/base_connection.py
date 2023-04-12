@@ -72,6 +72,7 @@ Netmiko 4.x and later has deprecated the use of delay_factor and/or
 max_loops in this context. You should remove any use of delay_factor=x
 from this method call.\n"""
 
+logging.basicConfig(filename='netmiko.log', level=logging.DEBUG)
 
 # Logging filter for #2597
 class SecretsFilter(logging.Filter):
