@@ -74,6 +74,11 @@ from this method call.\n"""
 
 logging.basicConfig(filename="netmiko.log", level=logging.DEBUG)
 logger = logging.getLogger("netmiko")
+handler = logging.StreamHandler()
+handler.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(name)s: %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler) 
 
 
 # Logging filter for #2597
