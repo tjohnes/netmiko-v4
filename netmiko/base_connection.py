@@ -73,6 +73,8 @@ max_loops in this context. You should remove any use of delay_factor=x
 from this method call.\n"""
 
 logging.basicConfig(filename='netmiko.log', level=logging.DEBUG)
+logging.getLogger("paramiko").setLevel(logging.DEBUG)
+
 
 # Logging filter for #2597
 class SecretsFilter(logging.Filter):
