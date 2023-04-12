@@ -72,7 +72,8 @@ Netmiko 4.x and later has deprecated the use of delay_factor and/or
 max_loops in this context. You should remove any use of delay_factor=x
 from this method call.\n"""
 
-logging.getLogger("paramiko").setLevel(logging.DEBUG)
+logging.basicConfig(filename="test.log", level=logging.DEBUG)
+logger = logging.getLogger("netmiko")
 
 
 # Logging filter for #2597
