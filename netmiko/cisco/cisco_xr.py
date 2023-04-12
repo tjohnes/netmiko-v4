@@ -120,7 +120,6 @@ class CiscoXrBase(CiscoBaseConnection):
             command_string = command_string.replace("commit", "commit best-effort")
         if replace:
             command_string = command_string.replace("commit", "commit replace")
-        print(f"command string is {command_string}")
 
         # Enter config mode (if necessary)
         output = self.config_mode()
@@ -162,13 +161,12 @@ class CiscoXrBase(CiscoBaseConnection):
                     read_timeout=read_timeout,
                 )
         output += new_data
-        if error_marker in output:
-            raise ValueError(f"Commit failed with the following errors:\n\n{output}")
+
         if alt_error_marker in output:
             if commit_error_dialog_dict is not None and alt_error_marker in commit_error_dialog_dict:
                 marker_value = commit_error_dialog_dict[alt_error_marker]
                 output += new_data
-                new_data += self._send_command_str(
+                new_data = self._send_command_str(
                     marker_value,
                     expect_string=r"\)#$",
                     strip_prompt=False,
@@ -182,7 +180,9 @@ class CiscoXrBase(CiscoBaseConnection):
                     "no", strip_prompt=False, strip_command=False
                 )
                 raise ValueError(f"Commit failed with the following errors:\n\n{output}")
-
+            
+        if error_marker in output:
+            raise ValueError(f"Commit failed with the following errors:\n\n{output}")
         return output
 
     def check_config_mode(
