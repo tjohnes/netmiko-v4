@@ -72,15 +72,6 @@ Netmiko 4.x and later has deprecated the use of delay_factor and/or
 max_loops in this context. You should remove any use of delay_factor=x
 from this method call.\n"""
 
-logging.basicConfig(filename="netmiko.log", level=logging.DEBUG)
-logger = logging.getLogger("netmiko")
-handler = logging.StreamHandler()
-handler.setLevel(logging.DEBUG)
-formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(name)s: %(message)s')
-handler.setFormatter(formatter)
-logger.addHandler(handler) 
-
-
 # Logging filter for #2597
 class SecretsFilter(logging.Filter):
     def __init__(self, no_log: Optional[Dict[Any, str]] = None) -> None:
@@ -656,7 +647,7 @@ Things you might try to fix this:
 many situations the pattern is automatically based on the network device's prompt.
 2. Increase the read_timeout to a larger value.
 
-You can also look at the Netmiko session_log or debug log for more information.\n\n"""
+You can also look at the Netmiko session_log  for more information.\n\n"""
         raise ReadTimeout(msg)
 
     def read_channel_timing(

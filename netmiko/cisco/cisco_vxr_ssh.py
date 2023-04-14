@@ -5,8 +5,6 @@ from __future__ import unicode_literals
 import re
 import time
 import logging
-import os
-import paramiko
 import warnings
 import socket
 
@@ -16,20 +14,7 @@ from netmiko.utilities import get_structured_data
 from netmiko.cafy_custom_exceptions import SessionDownException, PromptNotFoundException, PatternNotFoundException
 from netmiko.cafy_custom_exceptions import ConfigCommitError, ConfigModeEnterError, ConfigModeExitError, LOOP_DELAY
 
-work_dir = os.getenv('CAFYKIT_WORK_DIR')
-if work_dir:
-    formatter = logging.Formatter(fmt='%(asctime)s %(levelname)-8s %(message)s',
-                                  datefmt='%Y-%m-%d %H:%M:%S')
-    paramiko_log_folder = os.path.join(work_dir, 'test_paramiko.log')
-    paramiko.util.log_to_file(paramiko_log_folder, level="DEBUG")
-    fh = logging.FileHandler(paramiko_log_folder)
-    fh.setFormatter(formatter)
-    log = logging.getLogger("netmiko")
-    log.addHandler(fh)
-    log.setLevel(logging.DEBUG)
-    log.addHandler(fh)
-else:
-    from netmiko import log
+#log = logging.getLogger('netmiko')
 
 DELAY_FACTOR_DEPR_SIMPLE_MSG = """\n
 Delay Factor is not used in Cisco VXR SSH Netmiko Library.
@@ -74,7 +59,7 @@ class CiscoVxrSSH(CiscoXrSSH):
             log.error(msg)
             raise SessionDownException(msg)
 
-    '''
+    
     def read_until_pattern(self, pattern='', re_flags=0, max_loops=None, read_timeout=1800):
         """Function that reads channel until pattern is detected.
 
@@ -140,7 +125,7 @@ class CiscoVxrSSH(CiscoXrSSH):
                     self.read_timeout, pattern, output)
                 log.error(msg)
                 raise PatternNotFoundException(msg)
-    '''
+    
 
     
     def find_prompt(self, delay_factor=None, pattern= None):
