@@ -48,6 +48,7 @@ from netmiko.exceptions import (
     ReadException,
     ReadTimeout,
 )
+from netmiko.cafy_custom_exceptions import SessionDownException, PromptNotFoundException, PatternNotFoundException
 from netmiko.channel import Channel, SSHChannel, TelnetChannel, SerialChannel
 from netmiko.session_log import SessionLog
 from netmiko.utilities import (
@@ -628,7 +629,7 @@ pattern={pattern}
 output={repr(output)}
 results={results}
 """
-                    raise ReadException(msg)
+                    raise PatternNotFoundException(msg)
 
                 # Process such that everything before and including pattern is return.
                 # Everything else is retained in the _read_buffer
@@ -640,15 +641,14 @@ results={results}
                 return output
             time.sleep(loop_delay)
 
+        if self.remote_conn.closed:
+                msg = "Session went down while checking for pattern. Search pattern: {}".format(pattern)
+                log.error(msg)
+                raise SessionDownException(msg)
+
         msg = f"""\n\nPattern not detected: {repr(pattern)} in output.
-
-Things you might try to fix this:
-1. Adjust the regex pattern to better identify the terminating string. Note, in
-many situations the pattern is automatically based on the network device's prompt.
-2. Increase the read_timeout to a larger value.
-
 You can also look at the Netmiko session_log  for more information.\n\n"""
-        raise ReadTimeout(msg)
+        raise PatternNotFoundException(msg)
 
     def read_channel_timing(
         self,
@@ -1526,7 +1526,8 @@ A paramiko SSHException occurred during connection creation:
             try:
                 prompt = self.find_prompt()
             except ValueError:
-                prompt = self.base_prompt
+                    log.info("ValueError encountered from find_prompt() is not re-raised")
+                    prompt = self.base_prompt
         else:
             prompt = self.base_prompt
         return re.escape(prompt.strip())

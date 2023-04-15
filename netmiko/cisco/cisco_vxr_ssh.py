@@ -14,7 +14,7 @@ from netmiko.utilities import get_structured_data
 from netmiko.cafy_custom_exceptions import SessionDownException, PromptNotFoundException, PatternNotFoundException
 from netmiko.cafy_custom_exceptions import ConfigCommitError, ConfigModeEnterError, ConfigModeExitError, LOOP_DELAY
 
-#log = logging.getLogger('netmiko')
+log = logging.getLogger('netmiko')
 
 DELAY_FACTOR_DEPR_SIMPLE_MSG = """\n
 Delay Factor is not used in Cisco VXR SSH Netmiko Library.

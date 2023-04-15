@@ -4,6 +4,7 @@ import warnings
 from netmiko.base_connection import DELAY_FACTOR_DEPR_SIMPLE_MSG
 from netmiko.cisco_base_connection import CiscoBaseConnection, CiscoFileTransfer
 
+log = logging.getLogger('netmiko')
 
 class CiscoXrBase(CiscoBaseConnection):
     def establish_connection(self, width: int = 511, height: int = 511) -> None:
@@ -180,7 +181,7 @@ class CiscoXrBase(CiscoBaseConnection):
                     "no", strip_prompt=False, strip_command=False
                 )
                 raise ValueError(f"Commit failed with the following errors:\n\n{output}")
-            
+        log.debug(f"Commit output: {output}")   
         if error_marker in output:
             raise ValueError(f"Commit failed with the following errors:\n\n{output}")
         return output
