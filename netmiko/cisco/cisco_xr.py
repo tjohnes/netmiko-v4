@@ -3,6 +3,7 @@ import re
 import warnings
 from netmiko.base_connection import DELAY_FACTOR_DEPR_SIMPLE_MSG
 from netmiko.cisco_base_connection import CiscoBaseConnection, CiscoFileTransfer
+import logging
 
 log = logging.getLogger('netmiko')
 
