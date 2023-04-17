@@ -40,7 +40,7 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 import warnings
 
 from netmiko import log
-from netmiko.netmiko_globals import BACKSPACE_CHARG
+from netmiko.netmiko_globals import BACKSPACE_CHAR
 from netmiko.exceptions import (
     NetmikoTimeoutException,
     NetmikoAuthenticationException,
@@ -2178,14 +2178,23 @@ You can also look at the Netmiko session_log for more information.
 
         else:
             for cmd in config_commands:
-                self.write_channel(self.normalize_cmd(cmd))
+                try:
+                    self.write_channel(self.normalize_cmd(cmd))
 
-                # Make sure command is echoed
-                output += self.read_until_pattern(pattern=re.escape(cmd.strip()))
+                    # Make sure command is echoed
+                    output += self.read_until_pattern(pattern=re.escape(cmd.strip()))
 
-                # Read until next prompt or terminator (#); the .*$ forces read of entire line
-                pattern = f"(?:{re.escape(self.base_prompt)}.*$|{terminator}.*$)"
-                output += self.read_until_pattern(pattern=pattern, re_flags=re.M)
+                    # Read until next prompt or terminator (#); the .*$ forces read of entire line
+                    pattern = f"(?:{re.escape(self.base_prompt)}.*$|{terminator}.*$)"
+                    output += self.read_until_pattern(pattern=pattern, re_flags=re.M)
+                except SessionDownException:
+                    msg = f"Session went down while checking for config prompt after sending command: {cmd}"
+                    log.error(msg)
+                    raise SessionDownException(msg)
+                except PatternNotFoundException:
+                    msg = "Config Prompt not found after sending command: {cmd}"
+                    log.error(msg)
+                    raise PatternNotFoundException(msg)
 
                 if error_pattern:
                     if re.search(error_pattern, output, flags=re.M):
