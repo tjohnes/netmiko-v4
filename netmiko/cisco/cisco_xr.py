@@ -213,8 +213,12 @@ class CiscoXrBase(CiscoBaseConnection):
                     pattern=re.escape(exit_config.strip())
                 )
             # Read until we detect either an Uncommitted change or the end prompt
-            if not re.search(r"(Uncommitted|#$)", output):
-                output += self.read_until_pattern(pattern=r"(Uncommitted|#$)")
+            # For asr9k, fretta devices, admin prompt has a space after '#' like
+            # 'sysadmin-vm:0_RSP0#  '
+            # See the space after '#' in the above prompt. To handle this the regex is looking for zero or more space at the end of prompt
+            # therefore the regex is r"(Uncommitted|#\s*$)
+            if not re.search(r"(Uncommitted|#\s*$)", output):
+                output += self.read_until_pattern(pattern=r"(Uncommitted|#\s*$)")
             if "Uncommitted" in output:
                 self.write_channel(self.normalize_cmd("no\n"))
                 output += self.read_until_pattern(pattern=r"[>#]")
