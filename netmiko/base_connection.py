@@ -40,7 +40,7 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 import warnings
 
 from netmiko import log
-from netmiko.netmiko_globals import BACKSPACE_CHAR
+from netmiko.netmiko_globals import BACKSPACE_CHARG
 from netmiko.exceptions import (
     NetmikoTimeoutException,
     NetmikoAuthenticationException,
@@ -642,7 +642,7 @@ results={results}
             time.sleep(loop_delay)
 
         if self.remote_conn.closed:
-                msg = "Session went down while checking for pattern. Search pattern: {}".format(pattern)
+                msg = f"Session went down while checking for pattern. Search pattern: {repr(pattern)}"
                 log.error(msg)
                 raise SessionDownException(msg)
 
@@ -1696,17 +1696,19 @@ before timing out.\n"""
             new_data = self.read_channel()
 
         else:  # nobreak
-            msg = f"""
-Pattern not detected: {repr(search_pattern)} in output.
-
-Things you might try to fix this:
-1. Explicitly set your pattern using the expect_string argument.
-2. Increase the read_timeout to a larger value.
-
-You can also look at the Netmiko session_log or debug log for more information.
-
-"""
-            raise ReadTimeout(msg)
+            if self.remote_conn.closed:
+                    msg = "Session went down while checking for prompt after sending command. Search pattern: {}".format(
+                        search_pattern)
+                    log.error(msg)
+                    raise SessionDownException(msg)
+            else:
+                msg = f"""
+Pattern not found in output after sending command and waiting for {read_timeout} seconds. 
+Expected Pattern: {repr(search_pattern)}
+Output: {repr(output)}
+You can also look at the Netmiko session_log for more information.
+    """
+                raise PatternNotFoundException(msg)
 
         output = self._sanitize_output(
             output,
