@@ -647,6 +647,8 @@ results={results}
                 raise SessionDownException(msg)
 
         msg = f"""\n\nPattern not detected: {repr(pattern)} in output.
+Output: {repr(output)}
+Read_Timeout: {read_timeout}
 You can also look at the Netmiko session_log  for more information.\n\n"""
         raise PatternNotFoundException(msg)
 
