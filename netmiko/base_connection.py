@@ -552,6 +552,19 @@ class BaseConnection:
                 # If unable to send, we can tell for sure that the connection is unusable
                 return False
         return False
+    
+    def is_session_closed(self) -> bool:
+        """
+        Returns a boolean flag with the state of the connection
+        this is a cafy custom function needed because in cisco_vxr_Ssh code uses self.remote_conn.closed
+        attribute to check connection status. However the 'closed' attriubute is present on remote_conn object only if protocol is ssh
+        and not telnet. Therefore to handle telnet remote_Conn, this function is created a wrapper
+        """
+        if self.protocol == "telnet":
+            return self.is_alive()
+        else:
+            return self.remote_conn.closed
+        
 
     @lock_channel
     def read_channel(self) -> str:
@@ -610,7 +623,7 @@ where x is the total number of seconds to wait before timing out.\n"""
         loop_delay = 0.01
         start_time = time.time()
         # if read_timeout == 0 or 0.0 keep reading indefinitely
-        while (time.time() - start_time < read_timeout) or (not read_timeout):
+        while (time.time() - start_time < read_timeout) or (not read_timeout) and self.is_session_closed()==False:
             output += self.read_channel()
             if re.search(pattern, output, flags=re_flags):
                 results = re.split(pattern, output, maxsplit=1, flags=re_flags)
@@ -641,7 +654,7 @@ results={results}
                 return output
             time.sleep(loop_delay)
 
-        if self.remote_conn.closed:
+        if self.is_session_closed():
                 msg = f"Session went down while checking for pattern. Search pattern: {repr(pattern)}"
                 log.error(msg)
                 raise SessionDownException(msg)
@@ -1667,7 +1680,7 @@ before timing out.\n"""
         first_line_processed = False
 
         # Keep reading data until search_pattern is found or until read_timeout
-        while time.time() - start_time < read_timeout:
+        while time.time() - start_time < read_timeout and self.is_session_closed() == False:
             if new_data:
                 output += new_data
                 past_n_reads.append(new_data)
@@ -1696,7 +1709,7 @@ before timing out.\n"""
             new_data = self.read_channel()
 
         else:  # nobreak
-            if self.remote_conn.closed:
+            if self.is_session_closed():
                     msg = "Session went down while checking for prompt after sending command. Search pattern: {}".format(
                         search_pattern)
                     log.error(msg)
