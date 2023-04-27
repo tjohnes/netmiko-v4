@@ -561,7 +561,7 @@ class BaseConnection:
         and not telnet. Therefore to handle telnet remote_Conn, this function is created a wrapper
         """
         if self.protocol == "telnet":
-            return self.is_alive()
+            return not self.is_alive()
         else:
             return self.remote_conn.closed
         
