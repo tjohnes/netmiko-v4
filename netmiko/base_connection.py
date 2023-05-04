@@ -108,7 +108,7 @@ def log_writes(func: F) -> F:
         func(self, out_data)
         try:
             log.debug(
-                "write_channel: {}".format(
+                "{}, write_channel: {}".format(self.device_name,
                     str(write_bytes(out_data, encoding=self.encoding))
                 )
             )
@@ -180,7 +180,8 @@ class BaseConnection:
         sock: Optional[socket.socket] = None,
         auto_connect: bool = True,
         delay_factor_compat: bool = False,
-        max_read_timeout: Optional[int] = None
+        max_read_timeout: Optional[int] = None,
+        device_name=None
     ) -> None:
         """
         Initialize attributes for establishing connection to target device.
@@ -342,6 +343,7 @@ class BaseConnection:
             self.global_delay_factor = 0.1
         self.session_log = None
         self._session_log_close = False
+        self.device_name = device_name        
 
         # prevent logging secret data
         no_log = {}
@@ -573,7 +575,7 @@ class BaseConnection:
         new_data = self.normalize_linefeeds(new_data)
         if self.ansi_escape_codes:
             new_data = self.strip_ansi_escape_codes(new_data)
-        log.debug(f"read_channel: {new_data}")
+        log.debug(f"{self.device_name}, read_channel: {new_data}")
         if self.session_log:
             self.session_log.write(new_data)
 
@@ -650,7 +652,7 @@ results={results}
                 output = output + match_str
                 if buffer:
                     self._read_buffer += buffer
-                log.debug(f"Pattern found: {pattern} {output}")
+                log.debug(f"{self.device_name}, Pattern found: {pattern} {output}")
                 return output
             time.sleep(loop_delay)
 
@@ -1358,7 +1360,7 @@ A paramiko SSHException occurred during connection creation:
         self.clear_buffer()
         if not prompt:
             raise ValueError(f"Unable to find prompt: {prompt}")
-        log.debug(f"[find_prompt()]: prompt is {prompt}")
+        log.debug(f"{self.device_name}, [find_prompt()]: prompt is {prompt}")
         return prompt
 
     def clear_buffer(
@@ -1739,6 +1741,7 @@ You can also look at the Netmiko session_log for more information.
             textfsm_template=textfsm_template,
             ttp_template=ttp_template,
         )
+        log.debug(f"{self.device_name} Finish of cmd:{command_string}")
         return return_val
 
     def _send_command_str(self, *args: Any, **kwargs: Any) -> str:
@@ -2031,7 +2034,7 @@ You can also look at the Netmiko session_log for more information.
                 output += self.read_until_prompt(read_entire_line=True)
             if self.check_config_mode():
                 raise ValueError("Failed to exit configuration mode")
-        log.debug(f"exit_config_mode: {output}")
+        log.debug(f"{self.device_name}, exit_config_mode: {output}")
         return output
 
     def send_config_from_file(
@@ -2217,7 +2220,7 @@ You can also look at the Netmiko session_log for more information.
         if exit_config_mode:
             output += self.exit_config_mode()
         output = self._sanitize_output(output)
-        log.debug(f"{output}")
+        log.debug(f"{self.device_name}, {output}")
         return output
 
     def strip_ansi_escape_codes(self, string_buffer: str) -> str:
