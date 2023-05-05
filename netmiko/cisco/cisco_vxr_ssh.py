@@ -56,7 +56,7 @@ class CiscoVxrSSH(CiscoXrSSH):
             super().write_channel(out_data)
         except socket.error:
             msg = "Session went down while writing command on channel. Command: {}".format(out_data)
-            log.error(msg)
+            self.log.error(msg)
             raise SessionDownException(msg)
 
     
@@ -94,7 +94,7 @@ class CiscoVxrSSH(CiscoXrSSH):
         output = ''
         if not pattern:
             pattern = re.escape(self.base_prompt)
-        log.debug("In read_until_pattern, read_timeout: {}, blocking_timeout: {}, pattern is: {}".format(
+        self.log.debug("In read_until_pattern, read_timeout: {}, blocking_timeout: {}, pattern is: {}".format(
             self.read_timeout, self.blocking_timeout, pattern))
 
         start_time = time.time()
@@ -109,21 +109,21 @@ class CiscoVxrSSH(CiscoXrSSH):
             # self._write_session_log(new_data)
 
             if re.search(pattern, output, flags=re_flags):
-                log.info("Pattern found. Time Waited: {}.".format(current_time - start_time))
+                self.log.info("Pattern found. Time Waited: {}.".format(current_time - start_time))
                 return output
 
             time.sleep(LOOP_DELAY)
-            log.info("Pattern not found. Time waited: {}".format(current_time - start_time))
+            self.log.info("Pattern not found. Time waited: {}".format(current_time - start_time))
             current_time = time.time()
         else:
             if self.remote_conn.closed:
                 msg = "Session went down while checking for pattern. Search pattern: {}".format(pattern)
-                log.error(msg)
+                self.log.error(msg)
                 raise SessionDownException(msg)
             else:
                 msg = "Search Pattern not found after sending command and waiting for {} seconds. Expected Pattern: {}. Output: {}".format(
                     self.read_timeout, pattern, output)
-                log.error(msg)
+                self.log.error(msg)
                 raise PatternNotFoundException(msg)
     
 
@@ -155,9 +155,9 @@ class CiscoVxrSSH(CiscoXrSSH):
             prompt = self.read_channel().strip()
 
             if prompt:
-                log.info("Prompt found. Time Waited: {}. Prompt found is: {}.".format(current_time - start_time, prompt))
+                self.log.info("Prompt found. Time Waited: {}. Prompt found is: {}.".format(current_time - start_time, prompt))
                 if vxr_pattern in prompt.lower() or autocommand_pattern in prompt.lower() or cxr_pattern in prompt.lower():
-                    log.info("Pattern found in Prompt. Will retry.")
+                    self.log.info("Pattern found in Prompt. Will retry.")
                     time.sleep(LOOP_DELAY + 3)
                     self.clear_buffer()
                     self.write_channel(self.RETURN)
@@ -165,18 +165,18 @@ class CiscoVxrSSH(CiscoXrSSH):
                 else:
                     break
             else:
-                log.info("Prompt not found. Time Waited: {}".format(current_time - start_time))
+                self.log.info("Prompt not found. Time Waited: {}".format(current_time - start_time))
                 time.sleep(LOOP_DELAY)
 
             current_time = time.time()
         else:
             if self.remote_conn.closed:
                 msg = "Session went down while finding prompt"
-                log.error(msg)
+                self.log.error(msg)
                 raise SessionDownException(msg)
             else:
                 msg = "Prompt not found after waiting for {} seconds".format(self.read_timeout)
-                log.error(msg)
+                self.log.error(msg)
                 raise PromptNotFoundException(msg)
 
         if self.ansi_escape_codes:
@@ -188,7 +188,7 @@ class CiscoVxrSSH(CiscoXrSSH):
 
         time.sleep(LOOP_DELAY)
         self.clear_buffer()
-        log.info("Prompt is: {}.".format(prompt))
+        self.log.info("Prompt is: {}.".format(prompt))
         return prompt
     
 
@@ -240,7 +240,7 @@ class CiscoVxrSSH(CiscoXrSSH):
             log.warning(MAX_LOOPS_DEPR_SIMPLE_MSG)
 
         config_large_msg = "This could be a few minutes if your config is large"
-        log.info("In send_command, read_timeout: {}, blocking_timeout: {}, command: {}".format(
+        self.log.info("In send_command, read_timeout: {}, blocking_timeout: {}, command: {}".format(
             self.read_timeout, self.blocking_timeout, command_string))
 
         # Find the current router prompt
@@ -252,7 +252,7 @@ class CiscoVxrSSH(CiscoXrSSH):
             search_pattern = re.escape(prompt.strip())
         else:
             search_pattern = expect_string
-        log.info("In send_command, search pattern: {}.".format(search_pattern))
+        self.log.info("In send_command, search pattern: {}.".format(search_pattern))
 
         if normalize:
             command_string = self.normalize_cmd(command_string)
@@ -295,25 +295,25 @@ class CiscoVxrSSH(CiscoXrSSH):
                         break
             else:
                 time.sleep(LOOP_DELAY)
-            log.info("Pattern not found. Time waited: {}".format(current_time - start_time))
+            self.log.info("Pattern not found. Time waited: {}".format(current_time - start_time))
             current_time = time.time()
 
         else:  # nobreak
             if self.remote_conn.closed:
                 msg = "Session went down while checking for prompt after sending command. Search pattern: {}".format(
                     search_pattern)
-                log.error(msg)
+                self.log.error(msg)
                 raise SessionDownException(msg)
             else:
                 if expect_string is None:
                     msg = "Prompt not found after sending command and waiting for {} seconds. Expected Prompt: {}. Output: {}".format(
                         self.read_timeout, search_pattern, output)
-                    log.error(msg)
+                    self.log.error(msg)
                     raise PromptNotFoundException(msg)
                 else:
                     msg = "Search Pattern not found after sending command and waiting for {} seconds. Expected Pattern: {}. Output: {}".format(
                         self.read_timeout, search_pattern, output)
-                    log.error(msg)
+                    self.log.error(msg)
                     raise PatternNotFoundException(msg)
         output = self._sanitize_output(output, strip_command=strip_command,
                                        command_string=command_string, strip_prompt=strip_prompt)
@@ -330,11 +330,11 @@ class CiscoVxrSSH(CiscoXrSSH):
             output = self.read_until_pattern(pattern=pattern)
         except SessionDownException:
             msg = "Session went down while checking if router is in config mode"
-            log.error(msg)
+            self.log.error(msg)
             raise SessionDownException(msg)
         except PatternNotFoundException:
             msg = "Prompt Mode Pattern not found. Pattern: {}".format(pattern)
-            log.error(msg)
+            self.log.error(msg)
             raise PatternNotFoundException(msg)
         return check_string in output
 
@@ -358,12 +358,12 @@ class CiscoVxrSSH(CiscoXrSSH):
             except SessionDownException:
                 msg = "Session went down while checking for config prompt after sending config command: {}".format(
                     config_command)
-                log.error(msg)
+                self.log.error(msg)
                 raise SessionDownException(msg)
             except PatternNotFoundException:
                 msg = "Config Mode Pattern not found after sending config command. Config Command: {}, Pattern: {}".format(
                     config_command, pattern)
-                log.error(msg)
+                self.log.error(msg)
                 raise PatternNotFoundException(msg)
             if not self.check_config_mode():
                 raise ConfigModeEnterError("Failed to enter configuration mode.")
@@ -430,16 +430,16 @@ class CiscoVxrSSH(CiscoXrSSH):
                     output += self.read_until_pattern(pattern=r'\)#$')
                 except SessionDownException:
                     msg = "Session went down while checking for config prompt after sending command: {}".format(command)
-                    log.error(msg)
+                    self.log.error(msg)
                     raise SessionDownException(msg)
                 except PatternNotFoundException:
                     msg = "Config Prompt not found after sending command: {}".format(command)
-                    log.error(msg)
+                    self.log.error(msg)
                     raise PatternNotFoundException(msg)
         if exit_config_mode:
             output += self.exit_config_mode()
         output = self._sanitize_output(output)
-        log.debug("send_config_set Output: {}.".format(output))
+        self.log.debug("send_config_set Output: {}.".format(output))
         return output
 
     def commit(self, confirm=False, confirm_delay=None, comment='', label='', replace=False, best_effort=False, force=False,
@@ -518,7 +518,7 @@ class CiscoVxrSSH(CiscoXrSSH):
             command_string = command_string.replace("commit", "commit best-effort")
         if replace:
             command_string = command_string.replace("commit", "commit replace")
-        log.info("commit string is: {}".format(command_string))
+        self.log.info("commit string is: {}".format(command_string))
 
         output = ''
         if replace:
@@ -528,11 +528,11 @@ class CiscoVxrSSH(CiscoXrSSH):
                 output += self.read_until_pattern(pattern=commit_replace_marker)
             except SessionDownException:
                 msg = "Session went down after sending commit replace command"
-                log.error(msg)
+                self.log.error(msg)
                 raise SessionDownException(msg)
             except PatternNotFoundException:
                 msg = "Prompt not found after sending commit replace command"
-                log.error(msg)
+                self.log.error(msg)
                 raise PatternNotFoundException(msg)
             expect_string = r'\)#$' + "|" + alt_error_marker
             try:
@@ -540,11 +540,11 @@ class CiscoVxrSSH(CiscoXrSSH):
                                                    expect_string=expect_string)
             except SessionDownException:
                 msg = "Session went down while sending commit replace confirmation command"
-                log.error(msg)
+                self.log.error(msg)
                 raise SessionDownException(msg)
             except PatternNotFoundException:
                 msg = "Prompt not found after sending commit replace confirmation command"
-                log.error(msg)
+                self.log.error(msg)
                 raise PatternNotFoundException(msg)
         else:
             expect_string = r'\)#$' + "|" + alt_error_marker
@@ -553,11 +553,11 @@ class CiscoVxrSSH(CiscoXrSSH):
                                                    expect_string=expect_string)
             except SessionDownException:
                 msg = "Session went down while sending commit command"
-                log.error(msg)
+                self.log.error(msg)
                 raise SessionDownException(msg)
             except PatternNotFoundException:
                 msg = "Prompt not found after sending commit command"
-                log.error(msg)
+                self.log.error(msg)
                 raise PatternNotFoundException(msg)
 
         if alt_error_marker in output:
@@ -572,7 +572,7 @@ class CiscoVxrSSH(CiscoXrSSH):
                     "Commit failed as one or more commits have occurred from other configuration sessions:\n{0}".format(output))
         if error_marker in output:
             raise ConfigCommitError("Commit failed with the following errors:\n\n{0}".format(output))
-        log.debug("commit Output: {0}".format(output))
+        self.log.debug("commit Output: {0}".format(output))
         return output
 
     def exit_config_mode(self, exit_config='end', skip_check=False):
@@ -586,11 +586,11 @@ class CiscoVxrSSH(CiscoXrSSH):
             except SessionDownException:
                 msg = "Session went down while checking prompt after sending config mode exit command: {}".format(
                     exit_config)
-                log.error(msg)
+                self.log.error(msg)
                 raise SessionDownException(msg)
             except PatternNotFoundException:
                 msg = "Exec Mode Pattern not found after sending config mode exit command: {}".format(exit_config)
-                log.error(msg)
+                self.log.error(msg)
                 raise PatternNotFoundException(msg)
 
             if "Uncommitted" in output:
@@ -601,16 +601,16 @@ class CiscoVxrSSH(CiscoXrSSH):
                 except SessionDownException:
                     msg = "Session went down while checking prompt after sending {} to exit confirmation dialog".format(
                         config_mode_exit_dialog_cmd)
-                    log.error(msg)
+                    self.log.error(msg)
                     raise SessionDownException(msg)
                 except PatternNotFoundException:
                     msg = "Exec Mode Pattern not found after sending config mode exit dialog command: {}".format(config_mode_exit_dialog_cmd)
-                    log.error(msg)
+                    self.log.error(msg)
                     raise PatternNotFoundException(msg)
 
             if skip_check:
                 return output
             if self.check_config_mode():
                 raise ConfigModeExitError("Failed to exit configuration mode")
-            log.debug("exit_config_mode Output: {0}".format(output))
+            self.log.debug("exit_config_mode Output: {0}".format(output))
         return output

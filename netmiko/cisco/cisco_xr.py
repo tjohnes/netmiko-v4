@@ -139,11 +139,11 @@ class CiscoXrBase(CiscoBaseConnection):
                 )
             except SessionDownException:
                 msg = "Session went down after sending commit replace command"
-                log.error(msg)
+                self.log.error(msg)
                 raise SessionDownException(msg)
             except PatternNotFoundException:
                 msg = "Prompt not found after sending commit replace command"
-                log.error(msg)
+                self.log.error(msg)
                 raise PatternNotFoundException(msg)
             
             try:
@@ -158,11 +158,11 @@ class CiscoXrBase(CiscoBaseConnection):
                     )
             except SessionDownException:
                 msg = "Session went down while sending commit replace confirmation command"
-                log.error(msg)
+                self.log.error(msg)
                 raise SessionDownException(msg)
             except PatternNotFoundException:
                 msg = "Prompt not found after sending commit replace confirmation command"
-                log.error(msg)
+                self.log.error(msg)
                 raise PatternNotFoundException(msg)
             
         else:
@@ -178,11 +178,11 @@ class CiscoXrBase(CiscoBaseConnection):
                 )
             except SessionDownException:
                 msg = "Session went down while sending commit command"
-                log.error(msg)
+                self.log.error(msg)
                 raise SessionDownException(msg)
             except PatternNotFoundException:
                 msg = "Prompt not found after sending commit command"
-                log.error(msg)
+                self.log.error(msg)
                 raise PatternNotFoundException(msg)
             if "onfirm" in new_data:
                 output += new_data
@@ -196,11 +196,11 @@ class CiscoXrBase(CiscoBaseConnection):
                     )
                 except SessionDownException:
                     msg = "Session went down while sending commit confirmation command"
-                    log.error(msg)
+                    self.log.error(msg)
                     raise SessionDownException(msg)
                 except PatternNotFoundException:
                     msg = "Prompt not found after sending commit confirmation command"
-                    log.error(msg)
+                    self.log.error(msg)
                     raise PatternNotFoundException(msg)
         output += new_data
 
@@ -222,7 +222,7 @@ class CiscoXrBase(CiscoBaseConnection):
                     "no", strip_prompt=False, strip_command=False
                 )
                 raise ConfigCommitError(f"Commit failed as one or more commits have occurred from other configuration sessions:\n\n{output}")
-        log.debug(f"Commit output: {output}")   
+        self.log.debug(f"Commit output: {output}")   
         if error_marker in output:
             raise ConfigCommitError(f"Commit failed with the following errors:\n\n{output}")
         return output
@@ -240,11 +240,11 @@ class CiscoXrBase(CiscoBaseConnection):
             output = self.read_until_pattern(pattern=pattern)
         except SessionDownException:
             msg = f"Session went down while checking if router is in config mode"
-            log.error(msg)
+            self.log.error(msg)
             raise SessionDownException(msg)
         except PatternNotFoundException:
             msg = f"Prompt Mode Pattern not found. Pattern: {pattern}"
-            log.error(msg)
+            self.log.error(msg)
             raise PatternNotFoundException(msg)
         # Strip out (admin) so we don't get a false positive with (admin)#
         # (admin-config)# would still match.
@@ -271,11 +271,11 @@ class CiscoXrBase(CiscoBaseConnection):
                     output += self.read_until_pattern(pattern=r"(Uncommitted|#\s*$)")
             except SessionDownException:
                 msg = f"Session went down while checking prompt after sending config mode exit command: {exit_config}"
-                log.error(msg)
+                self.log.error(msg)
                 raise SessionDownException(msg)
             except PatternNotFoundException:
                 msg = f"Exec Mode Pattern not found after sending config mode exit command: {exit_config}"
-                log.error(msg)
+                self.log.error(msg)
                 raise PatternNotFoundException(msg)
             if "Uncommitted" in output:
                 self.write_channel(self.normalize_cmd("no\n"))
@@ -283,11 +283,11 @@ class CiscoXrBase(CiscoBaseConnection):
                     output += self.read_until_pattern(pattern=r"[>#]")
                 except SessionDownException:
                     msg = f"Session went down while checking prompt after sending 'no' to exit confirmation dialog"
-                    log.error(msg)
+                    self.log.error(msg)
                     raise SessionDownException(msg)
                 except PatternNotFoundException:
                     msg = f"Exec Mode Pattern not found after sending config mode exit dialog command: no"
-                    log.error(msg)
+                    self.log.error(msg)
                     raise PatternNotFoundException(msg)
             if not re.search(pattern, output, flags=re.M):
                 output += self.read_until_pattern(pattern=pattern)
@@ -295,7 +295,7 @@ class CiscoXrBase(CiscoBaseConnection):
                 return output
             if self.check_config_mode():
                 raise ConfigModeExitError("Failed to exit configuration mode")
-            log.debug("exit_config_mode Output: {0}".format(output))
+            self.log.debug("exit_config_mode Output: {0}".format(output))
         return output
 
     def save_config(self, *args: Any, **kwargs: Any) -> str:

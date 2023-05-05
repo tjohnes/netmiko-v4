@@ -112,19 +112,19 @@ class CiscoBaseConnection(BaseConnection):
         for _ in range(outer_loops):
             while i <= inner_loops:
                 try:
-                    log.debug("Reading channel for the first time")
+                    self.log.debug("Reading channel for the first time")
                     output = self.read_channel()
 
                     # This below if block is addeed because when the telnet console starts with UserName,
                     # self.read_channel which internally calls telnetlib.read_ver_eager() returns empty string
                     # So, assign it to self.find_prompt()
-                    log.debug("Output after reading channel for first time: {}".format(output))
+                    self.log.debug("Output after reading channel for first time: {}".format(output))
                     if output == '':
                         time.sleep(2 * delay_factor)
-                        log.debug("output is empty, doing find_prompt()")
+                        self.log.debug("output is empty, doing find_prompt()")
                         output = self.find_prompt()
 
-                    log.debug("Output after doing find_prompt: {}".format(output))
+                    self.log.debug("Output after doing find_prompt: {}".format(output))
                     return_msg += output
 
                     # is at spitfire xr prompt
@@ -189,11 +189,11 @@ class CiscoBaseConnection(BaseConnection):
                     # Search for username pattern / send username
                     # If the prompt shows "xr login:", the you can directly login to xr using xr username
                     # and password or you can login to linux host, using linux host's username password
-                    log.debug("Searching for username pattern")
+                    self.log.debug("Searching for username pattern")
                     my_password = self.password
                     if re.search(username_pattern, output, flags=re.I):
                         # Sometimes username/password must be terminated with "\r" and not "\r\n"
-                        log.debug("Username pattern detected, sending Username={}".format(self.username))
+                        self.log.debug("Username pattern detected, sending Username={}".format(self.username))
                         time.sleep(1)
                         bmc_login_pattern = "spitfire-arm login:"
                         if re.search(bmc_login_pattern, output):
@@ -204,8 +204,8 @@ class CiscoBaseConnection(BaseConnection):
                         time.sleep(1 * delay_factor)
                         output = self.read_channel()
                         return_msg += output
-                        log.debug("After sending username, the output pattern is={}".format(output))
-                        log.debug("________________________________________________")
+                        self.log.debug("After sending username, the output pattern is={}".format(output))
+                        self.log.debug("________________________________________________")
                     else:
                         xr_or_host_login_pattern = "xr login:"
                         xr_or_host_login_alt_pattern = "ios login:"
