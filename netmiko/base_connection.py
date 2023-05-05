@@ -67,7 +67,6 @@ if TYPE_CHECKING:
 # For decorators
 F = TypeVar("F", bound=Callable[..., Any])
 
-
 DELAY_FACTOR_DEPR_SIMPLE_MSG = """\n
 Netmiko 4.x and later has deprecated the use of delay_factor and/or
 max_loops in this context. You should remove any use of delay_factor=x
@@ -85,6 +84,13 @@ class SecretsFilter(logging.Filter):
                 record.msg = record.msg.replace(hidden_data, "********")
         return True
 
+class ContextAdapter(logging.LoggerAdapter):
+    '''
+    Custom cafy function to add device_name (whose value is router_name, ip, port) 
+    in all netmiko log messages
+    '''
+    def process(self, msg, kwargs):
+        return '[%s] %s' % (self.extra['device_name'], msg), kwargs
 
 def lock_channel(func: F) -> F:
     @functools.wraps(func)
@@ -107,8 +113,8 @@ def log_writes(func: F) -> F:
     def wrapper_decorator(self: "BaseConnection", out_data: str) -> None:
         func(self, out_data)
         try:
-            log.debug(
-                "{}, write_channel: {}".format(self.device_name,
+            self.log.debug(
+                "write_channel: {}".format(
                     str(write_bytes(out_data, encoding=self.encoding))
                 )
             )
@@ -352,6 +358,7 @@ class BaseConnection:
         if self.secret:
             no_log["secret"] = self.secret
         log.addFilter(SecretsFilter(no_log=no_log))
+        self.log = ContextAdapter(log, {'device_name': self.device_name })
 
         # Netmiko will close the session_log if we open the file
         if session_log is not None:
@@ -575,7 +582,7 @@ class BaseConnection:
         new_data = self.normalize_linefeeds(new_data)
         if self.ansi_escape_codes:
             new_data = self.strip_ansi_escape_codes(new_data)
-        log.debug(f"{self.device_name}, read_channel: {new_data}")
+        self.log.debug(f"read_channel: {new_data}")
         if self.session_log:
             self.session_log.write(new_data)
 
@@ -652,7 +659,7 @@ results={results}
                 output = output + match_str
                 if buffer:
                     self._read_buffer += buffer
-                log.debug(f"{self.device_name}, Pattern found: {pattern} {output}")
+                self.log.debug(f"Pattern found: {pattern} in output: {output}")
                 return output
             time.sleep(loop_delay)
 
@@ -1205,8 +1212,8 @@ A paramiko SSHException occurred during connection creation:
             warnings.warn(DELAY_FACTOR_DEPR_SIMPLE_MSG, DeprecationWarning)
 
         command = self.normalize_cmd(command)
-        log.debug("In disable_paging")
-        log.debug(f"Command: {command}")
+        self.log.debug("In disable_paging")
+        self.log.debug(f"Command: {command}")
         self.write_channel(command)
         # Make sure you read until you detect the command echo (avoid getting out of sync)
         if cmd_verify and self.global_cmd_verify is not False:
@@ -1217,8 +1224,8 @@ A paramiko SSHException occurred during connection creation:
             output = self.read_until_pattern(pattern=pattern, read_timeout=20)
         else:
             output = self.read_until_prompt()
-        log.debug(f"{output}")
-        log.debug("Exiting disable_paging")
+        self.log.debug(f"{output}")
+        self.log.debug("Exiting disable_paging")
         return output
 
     def set_terminal_width(
@@ -1360,7 +1367,7 @@ A paramiko SSHException occurred during connection creation:
         self.clear_buffer()
         if not prompt:
             raise ValueError(f"Unable to find prompt: {prompt}")
-        log.debug(f"{self.device_name}, [find_prompt()]: prompt is {prompt}")
+        self.log.debug(f"[find_prompt()]: prompt is {prompt}")
         return prompt
 
     def clear_buffer(
@@ -1384,7 +1391,7 @@ A paramiko SSHException occurred during connection creation:
             if not data:
                 break
             # Double sleep time each time we detect data
-            log.debug("Clear buffer detects data in the channel")
+            self.log.debug("Clear buffer detects data in the channel")
             if backoff:
                 sleep_time *= 2
                 sleep_time = backoff_max if sleep_time >= backoff_max else sleep_time
@@ -1741,7 +1748,7 @@ You can also look at the Netmiko session_log for more information.
             textfsm_template=textfsm_template,
             ttp_template=ttp_template,
         )
-        log.debug(f"{self.device_name} Finish of cmd:{command_string}")
+        self.log.debug(f"Finish of cmd:{command_string}")
         return return_val
 
     def _send_command_str(self, *args: Any, **kwargs: Any) -> str:
@@ -2034,7 +2041,7 @@ You can also look at the Netmiko session_log for more information.
                 output += self.read_until_prompt(read_entire_line=True)
             if self.check_config_mode():
                 raise ValueError("Failed to exit configuration mode")
-        log.debug(f"{self.device_name}, exit_config_mode: {output}")
+        self.log.debug(f"exit_config_mode: {output}")
         return output
 
     def send_config_from_file(
@@ -2220,7 +2227,7 @@ You can also look at the Netmiko session_log for more information.
         if exit_config_mode:
             output += self.exit_config_mode()
         output = self._sanitize_output(output)
-        log.debug(f"{self.device_name}, {output}")
+        self.log.debug(f"{output}")
         return output
 
     def strip_ansi_escape_codes(self, string_buffer: str) -> str:
