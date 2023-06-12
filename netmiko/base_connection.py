@@ -598,7 +598,7 @@ class BaseConnection:
     def read_until_pattern(
         self,
         pattern: str = "",
-        read_timeout: float = 10.0,
+        read_timeout: float = 30.0,
         re_flags: int = 0,
         max_loops: Optional[int] = None,
     ) -> str:
@@ -2205,17 +2205,17 @@ You can also look at the Netmiko session_log for more information.
                     self.write_channel(self.normalize_cmd(cmd))
 
                     # Make sure command is echoed
-                    output += self.read_until_pattern(pattern=re.escape(cmd.strip()))
+                    output += self.read_until_pattern(pattern=re.escape(cmd.strip()), read_timeout=read_timeout)
 
                     # Read until next prompt or terminator (#); the .*$ forces read of entire line
                     pattern = f"(?:{re.escape(self.base_prompt)}.*$|{terminator}.*$)"
-                    output += self.read_until_pattern(pattern=pattern, re_flags=re.M)
+                    output += self.read_until_pattern(pattern=pattern, re_flags=re.M, read_timeout=read_timeout)
                 except SessionDownException:
                     msg = f"Session went down while checking for config prompt after sending command: {cmd}"
                     log.error(msg)
                     raise SessionDownException(msg)
                 except PatternNotFoundException:
-                    msg = "Config Prompt not found after sending command: {cmd}"
+                    msg = f"Config Prompt not found after sending command: {cmd}"
                     log.error(msg)
                     raise PatternNotFoundException(msg)
 
