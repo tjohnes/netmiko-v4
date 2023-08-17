@@ -259,9 +259,9 @@ class CiscoXrBase(CiscoBaseConnection):
     ) -> str:
         if not pattern:
             # Make sure the *entire* config prompt is read.
-            pattern = self.base_prompt[:16]
-            check_string = ")#"
-            pattern = re.escape(f"{pattern}.*{check_string}")
+            pattern = re.escape(self.base_prompt[:16])
+            check_string = re.escape(")#")
+            pattern = f"{pattern}.*{check_string}"
         return super().config_mode(
             config_command=config_command, pattern=pattern, re_flags=re_flags
         )
